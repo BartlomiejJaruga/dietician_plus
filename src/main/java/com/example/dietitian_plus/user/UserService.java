@@ -2,12 +2,15 @@ package com.example.dietitian_plus.user;
 
 import com.example.dietitian_plus.dietitian.Dietitian;
 import com.example.dietitian_plus.dietitian.DietitianRepository;
+import com.example.dietitian_plus.disease.DiseaseDto;
+import com.example.dietitian_plus.disease.DiseaseMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -17,15 +20,17 @@ public class UserService {
     private final DietitianRepository dietitianRepository;
 
     private final UserMapper userMapper;
+    private final DiseaseMapper diseaseMapper;
 
     private final String USER_NOT_FOUND_MESSAGE = "User not found";
     private final String DIETITIAN_NOT_FOUND_MESSAGE = "Dietitian not found";
 
     @Autowired
-    public UserService(UserRepository userRepository, DietitianRepository dietitianRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, DietitianRepository dietitianRepository, UserMapper userMapper, DiseaseMapper diseaseMapper) {
         this.userRepository = userRepository;
         this.dietitianRepository = dietitianRepository;
         this.userMapper = userMapper;
+        this.diseaseMapper = diseaseMapper;
     }
 
     public List<UserDto> getUsers() {
@@ -45,6 +50,17 @@ public class UserService {
         }
 
         return userMapper.toDto(userRepository.getReferenceById(id));
+    }
+
+    public List<DiseaseDto> getUserDiseases(Long id) throws EntityNotFoundException {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException(USER_NOT_FOUND_MESSAGE);
+        }
+
+        return diseaseMapper
+                .toDtoList(userRepository.findById(id)
+                        .map(User::getDiseases)
+                        .orElse(Collections.emptyList()));
     }
 
     @Transactional

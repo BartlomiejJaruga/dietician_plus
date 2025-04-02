@@ -49,9 +49,9 @@ public class MealService {
         return mealsDto;
     }
 
-    public List<DishDto> getDishesByMealId(Long mealId) {
+    public List<DishDto> getMealDishes(Long id) {
         return dishMapper
-                .toDtoList(mealRepository.findById(mealId)
+                .toDtoList(mealRepository.findById(id)
                         .map(Meal::getDishes)
                         .orElse(Collections.emptyList()));
     }
